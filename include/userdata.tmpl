@@ -13,8 +13,7 @@ function ConnectToDomain() {
 }
 
 net user administrator ${local_password}
-$instanceId = (Invoke-RestMethod -Method Get -Uri http://169.254.169.254/latest/meta-data/instance-id).Trim()
-$newName = $instanceId.substring(0,15) # limit to 15 characters
+$newName = "dsc_pull"
 if ( ([string]::Compare($newName, $env:computerName, $True) -ne 0) ) {
 	$rename = (Get-WmiObject -Class Win32_ComputerSystem).Rename($newName,"${local_password}",'Administrator').ReturnValue
   if ($rename -eq 0) {
