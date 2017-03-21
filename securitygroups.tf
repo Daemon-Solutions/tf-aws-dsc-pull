@@ -11,13 +11,6 @@ resource "aws_security_group" "dsc_pull" {
     cidr_blocks = ["${data.aws_vpc.cidr.cidr_block}"]
   }
 
-  egress {
-    from_port   = "443"
-    to_port     = "443"
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   ingress {
     from_port   = "8080"
     to_port     = "8080"
