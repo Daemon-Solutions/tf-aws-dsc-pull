@@ -1,0 +1,46 @@
+#install cert
+New-Item c:\dsc -ItemType Directory -ErrorAction SilentlyContinue
+$bucketname = "${cert_bucket}"
+$bucketobject = "${cert_file}"
+$ssmparam	= "${cert_pass_ssmparam}"
+$certificate_password = (Get-SSMParameterValue -Name $ssmparam -WithDecryption $true).Parameters.value
+$certstore = "c:\dsc\cert.pfx"
+copy-S3Object -BucketName $bucketname -Key $bucketobject -LocalFile $certstore
+
+#copy dsc setup scripts from S3Object
+$dscbucketname="${dsc_bucket}"
+$dscbucketname | Out-File -FilePath c:\dsc\dsc_bucket.txt
+copy-S3Object -BucketName $dscbucketname -Key setup-dsc.ps1 -LocalFile c:\dsc\setup-dsc.ps1
+copy-S3Object -BucketName $dscbucketname -Key scheduled-task.ps1 -LocalFile c:\dsc\scheduled-task.ps1
+copy-S3Object -BucketName $dscbucketname -Key createmofs.xml -LocalFile c:\dsc\createmofs.xml
+
+
+
+$certpwd = ConvertTo-SecureString $certificate_password -AsPlainText -Force
+$cert=Import-PfxCertificate -CertStoreLocation Cert:\LocalMachine\my -Password $certpwd -FilePath $certstore
+$cert.thumbprint | Out-File -FilePath c:\dsc\cert_thumprint.txt
+
+
+#prep dsc
+install-packageprovider -name nuget -minimumversion 2.8.5.201 -force
+install-module xPSDesiredStateConfiguration -Force
+
+#create dsc registrationkey and store in SSM - write fails if SSMParameter already exists , which protects the SSMParameterValue
+$guid=new-guid
+Write-SSMParameter -type SecureString -Value $guid -Name "dsc-registrationkey"
+
+#launch dsc setup script
+if (((Get-WindowsFeature -Name DSC-service).installstate) -ne "Installed"){
+c:\dsc\setup-dsc.ps1}
+
+#populate dsc files from S3Object
+New-Item c:\dsc\configs -ItemType Directory -ErrorAction SilentlyContinue
+$dsc_files=(get-s3object -BucketName $dscbucketname | ? {$_.key -like "dsc*"}).Key
+foreach ($dsc_file in $dsc_files){
+Copy-S3Object -BucketName $dscbucketname -Key $dsc_file -LocalFile "c:\dsc\configs\$dsc_file" 
+}
+
+#create dsc file import scheduled task
+schtasks /create /xml C:\dsc\createmofs.xml /tn importdsc
+
+

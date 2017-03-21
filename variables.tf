@@ -19,8 +19,8 @@ variable "private_subnets" {
 }
 
 variable "azs" {
-  type = "list"
-  default = ["eu-west-1a","eu-west-1b","eu-west-1c"]
+  type    = "list"
+  default = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
 }
 
 variable "domain_name" {}
@@ -55,8 +55,8 @@ variable "local_password" {}
 
 variable "windows_ami_names" {
   default = {
-    "2008" = "Windows_Server-2008-R2_SP1-English-64Bit-Base-*",
-    "2012" = "Windows_Server-2012-R2_RTM-English-64Bit-Base-*",
+    "2008" = "Windows_Server-2008-R2_SP1-English-64Bit-Base-*"
+    "2012" = "Windows_Server-2012-R2_RTM-English-64Bit-Base-*"
     "2016" = "Windows_Server-2016-English-Full-Base*"
   }
 }
@@ -84,30 +84,25 @@ variable "rdgw_ssh_cidrs" {
 
 ## elb vars
 
-variable "elb_aws_account" {
-  default = {
-    us-east-1      = "127311923021"
-    us-west-2      = "797873946194"
-    us-west-1      = "027434742980"
-    eu-west-1      = "156460612806"
-    eu-central-1   = "054676820928"
-    ap-southeast-1 = "114774131450"
-    ap-northeast-1 = "582318560864"
-    ap-southeast-2 = "783225319266"
-    ap-northeast-2 = "600734575887"
-    sa-east-1      = "507241528517"
-    us-gov-west-1  = "048591011584"
-    cn-north-1     = "638102146993"
-  }
-}
-
 variable "admin_users" {
   default = {
-    "SimpleAD"    = "administrator",
+    "SimpleAD"    = "administrator"
     "MicrosoftAD" = "admin"
   }
 }
 
 variable "ad_type" {}
 
-variable "rdgw_internal_sg" {}
+variable "dsc_configs" {
+  default = [
+    "dsc-smtp-server.ps1",
+    "dsc-web-server.ps1",
+    "setup-dsc.ps1",
+    "createmofs.xml",
+    "scheduled-task.ps1",
+  ]
+}
+
+variable "cert_bucket" {}
+variable "cert_file" {}
+variable "cert_pass_ssmparam" {}
