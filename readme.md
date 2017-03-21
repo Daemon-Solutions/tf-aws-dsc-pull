@@ -1,7 +1,15 @@
 tf-aws-dsc-pull
 ========================
 
-This module is for creating a Windows DSC Pull Server
+This module is for creating a Windows DSC Pull Server. The server has a scheduled task that pulls DSC configuration files from an S3 bucket and converts them to MOF files ready for use by DSC nodes. 
+
+The server builds with all the required windows features and applies an PFX certificate to the DSC webserver.
+
+On creation, the DSC RegistrationKey is stored as an SSM Parameter for use by DSC nodes when registering against the pull server.
+
+Sample DSC configuration files are included in the module to show the format. Additional files can be added to the bucket and will be automatically imported into the dsc server. These files must be in the following format DSC*.PS1
+
+
 
 Prerequisites
 -------------
